@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding — Feel the Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b12;
+    --bg2: #0d1220;
+    --surface: #111827;
+    --border: rgba(99,255,179,0.15);
+    --neon: #63ffb3;
+    --neon2: #3de0ff;
+    --neon3: #ff6bde;
+    --accent: #ffe066;
+    --text: #e8edf5;
+    --muted: #6b7a99;
+    --glow: 0 0 20px rgba(99,255,179,0.4), 0 0 60px rgba(99,255,179,0.15);
+    --glow2: 0 0 20px rgba(61,224,255,0.4), 0 0 60px rgba(61,224,255,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--neon);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+    box-shadow: var(--glow);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(99,255,179,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, width 0.3s, height 0.3s;
+  }
+  body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 20px; height: 20px; }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,255,179,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,255,179,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(8,11,18,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--neon);
+    text-shadow: var(--glow);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--neon3); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2.5rem;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--neon); text-shadow: var(--glow); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--neon);
+    color: var(--neon) !important;
+    padding: 0.5rem 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-cta:hover {
+    background: var(--neon);
+    color: var(--bg) !important;
+    box-shadow: var(--glow);
+    text-shadow: none !important;
+  }
+
+  /* ===== HERO ===== */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 4rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.25;
+    animation: float 8s ease-in-out infinite;
+  }
+  .orb1 { width: 600px; height: 600px; background: var(--neon); top: -200px; right: -100px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: var(--neon2); bottom: -100px; left: 20%; animation-delay: 3s; }
+  .orb3 { width: 300px; height: 300px; background: var(--neon3); top: 40%; left: -100px; animation-delay: 6s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    color: var(--neon2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    background: rgba(61,224,255,0.05);
+  }
+  .hero-tag::before {
+    content: '▶';
+    font-size: 0.6rem;
+    animation: blink 1.2s step-end infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  h1 .line1 { display: block; color: var(--text); }
+  h1 .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--neon) 0%, var(--neon2) 50%, var(--neon3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 3rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-primary {
+    background: var(--neon);
+    color: var(--bg);
+    border: none;
+    padding: 1rem 2.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover {
+    box-shadow: var(--glow);
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 1rem 2.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-ghost:hover {
+    border-color: var(--neon2);
+    color: var(--neon2);
+    box-shadow: var(--glow2);
+  }
+
+  /* Terminal widget */
+  .terminal {
+    position: absolute;
+    right: 4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 440px;
+    background: rgba(13,18,32,0.9);
+    border: 1px solid rgba(99,255,179,0.2);
+    box-shadow: 0 0 40px rgba(99,255,179,0.1), inset 0 0 40px rgba(0,0,0,0.5);
+    z-index: 2;
+    backdrop-filter: blur(20px);
+    animation: slideInRight 1s ease 0.5s both;
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateY(-50%) translateX(60px); }
+    to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid rgba(99,255,179,0.15);
+    background: rgba(99,255,179,0.05);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot1 { background: #ff5f57; }
+  .dot2 { background: #febc2e; }
+  .dot3 { background: #28c840; }
+  .terminal-title {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .terminal-body {
+    padding: 1.5rem;
+    font-size: 0.78rem;
+    line-height: 2;
+    min-height: 260px;
+  }
+  .t-line { display: flex; gap: 0.5rem; }
+  .t-prompt { color: var(--neon); user-select: none; }
+  .t-cmd { color: var(--text); }
+  .t-out { color: var(--muted); padding-left: 1rem; }
+  .t-success { color: var(--neon); padding-left: 1rem; }
+  .t-highlight { color: var(--accent); }
+  .cursor-blink {
+    display: inline-block;
+    width: 8px; height: 1.2em;
+    background: var(--neon);
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+    margin-left: 2px;
+  }
+
+  /* ===== FEATURES ===== */
+  #features {
+    position: relative;
+    z-index: 1;
+    padding: 8rem 4rem;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--neon2);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--neon2), transparent);
+    max-width: 120px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: rgba(99,255,179,0.08);
+  }
+
+  .feature-card {
+    background: var(--bg2);
+    padding: 2.5rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease, background 0.3s;
+  }
+  .feature-card.visible { opacity: 1; transform: translateY(0); }
+  .feature-card:nth-child(2) { transition-delay: 0.1s; }
+  .feature-card:nth-child(3) { transition-delay: 0.2s; }
+  .feature-card:nth-child(4) { transition-delay: 0.1s; }
+  .feature-card:nth-child(5) { transition-delay: 0.2s; }
+  .feature-card:nth-child(6) { transition-delay: 0.3s; }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .feature-card:hover { background: rgba(99,255,179,0.05); }
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.01em;
+  }
+  .feature-card p { font-size: 0.82rem; line-height: 1.8; color: var(--muted); }
+
+  /* ===== HOW IT WORKS ===== */
+  #how {
+    position: relative;
+    z-index: 1;
+    padding: 8rem 4rem;
+    background: linear-gradient(180deg, transparent, rgba(99,255,179,0.02) 50%, transparent);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+    margin-top: 4rem;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 2.5rem;
+    left: 12.5%;
+    right: 12.5%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), var(--neon3), transparent);
+    z-index: 0;
+  }
+
+  .step {
+    text-align: center;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .step.visible { opacity: 1; transform: translateY(0); }
+  .step:nth-child(2) { transition-delay: 0.15s; }
+  .step:nth-child(3) { transition-delay: 0.3s; }
+  .step:nth-child(4) { transition-delay: 0.45s; }
+
+  .step-num {
+    width: 5rem; height: 5rem;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--neon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--neon);
+    box-shadow: var(--glow);
+  }
+  .step:nth-child(2) .step-num { border-color: var(--neon2); color: var(--neon2); box-shadow: var(--glow2); }
+  .step:nth-child(3) .step-num { border-color: var(--neon3); color: var(--neon3); box-shadow: 0 0 20px rgba(255,107,222,0.4); }
+  .step:nth-child(4) .step-num { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(255,224,102,0.4); }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .step p { font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
+
+  /* ===== STATS ===== */
+  #stats {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .stat-item {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .stat-item.visible { opacity: 1; transform: scale(1); }
+  .stat-item:nth-child(2) { transition-delay: 0.1s; }
+  .stat-item:nth-child(3) { transition-delay: 0.2s; }
+  .stat-item:nth-child(4) { transition-delay: 0.3s; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-item:nth-child(1) .stat-num { color: var(--neon); text-shadow: var(--glow); }
+  .stat-item:nth-child(2) .stat-num { color: var(--neon2); text-shadow: var(--glow2); }
+  .stat-item:nth-child(3) .stat-num { color: var(--neon3); }
+  .stat-item:nth-child(4) .stat-num { color: var(--accent); }
+  .stat-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ===== TESTIMONIALS ===== */
+  #testimonials {
+    position: relative;
+    z-index: 1;
+    padding: 8rem 4rem;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .testimonial {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .testimonial.visible { opacity: 1; transform: translateY(0); }
+  .testimonial:nth-child(2) { transition-delay: 0.1s; }
+  .testimonial:nth-child(3) { transition-delay: 0.2s; }
+
+  .testimonial::before {
+    content: '"';
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--neon);
+    opacity: 0.15;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .testimonial p {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .t-author {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .t-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+  }
+  .av1 { background: rgba(99,255,179,0.15); color: var(--neon); border: 1px solid rgba(99,255,179,0.3); }
+  .av2 { background: rgba(61,224,255,0.15); color: var(--neon2); border: 1px solid rgba(61,224,255,0.3); }
+  .av3 { background: rgba(255,107,222,0.15); color: var(--neon3); border: 1px solid rgba(255,107,222,0.3); }
+
+  .t-info { font-size: 0.78rem; }
+  .t-name { color: var(--text); font-weight: 700; }
+  .t-role { color: var(--muted); }
+
+  /* ===== CTA ===== */
+  #cta {
+    position: relative;
+    z-index: 1;
+    padding: 10rem 4rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .cta-inner {
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .cta-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(99,255,179,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-inner h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .cta-inner h2 span {
+    background: linear-gradient(135deg, var(--neon), var(--neon2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cta-inner p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+    line-height: 1.8;
+  }
+
+  .cta-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .cta-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-right: none;
+    padding: 1rem 1.5rem;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cta-input:focus { border-color: var(--neon); }
+  .cta-input::placeholder { color: var(--muted); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 3rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer .logo { font-size: 1rem; }
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--neon); }
+  .footer-copy { font-size: 0.72rem; color: var(--muted); }
+
+  /* Floating particles */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--neon);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFly var(--dur) linear var(--delay) infinite;
+  }
+  @keyframes particleFly {
+    0% { transform: translateY(100vh) translateX(var(--dx)); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) translateX(calc(var(--dx) + var(--drift))); opacity: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .terminal { display: none; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .steps::before { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonials-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav ul { display: none; }
+    #hero, #features, #how, #stats, #testimonials, #cta { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .features-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    .cta-form { flex-direction: column; }
+    .cta-input { border-right: 1px solid rgba(255,255,255,0.1); border-bottom: none; }
+  }
+
+  /* Animation helpers */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* Code highlight colors */
+  .kw { color: var(--neon3); }
+  .fn { color: var(--neon2); }
+  .str { color: var(--accent); }
+  .cm { color: #4b5a72; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">vibe<span>.</span>coding</div>
+  <ul>
+    <li><a href="#features">기능</a></li>
+    <li><a href="#how">사용법</a></li>
+    <li><a href="#testimonials">후기</a></li>
+    <li><a href="#cta" class="nav-cta">무료 시작 →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-tag">New Era of Development</div>
+    <h1>
+      <span class="line1">코드를 느껴라,</span>
+      <span class="line2">Vibe Coding.</span>
+    </h1>
+    <p class="hero-desc">
+      AI와 함께하는 새로운 코딩 패러다임.<br>
+      직관적으로 아이디어를 표현하면,<br>
+      코드가 흐름처럼 완성됩니다.
+    </p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-primary">무료로 시작하기</a>
+      <a href="#how" class="btn-ghost">작동 방식 보기</a>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot1"></div>
+      <div class="dot dot2"></div>
+      <div class="dot dot3"></div>
+      <span class="terminal-title">vibe-terminal — zsh</span>
+    </div>
+    <div class="terminal-body" id="terminalBody">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">핵심 기능</div>
+  <h2 class="section-title fade-up">
+    개발 경험을<br>재정의하다
+  </h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <h3>실시간 AI 페어 프로그래밍</h3>
+      <p>AI가 옆에 앉아 코딩하는 것처럼. 자연어로 의도를 말하면 즉시 코드로 변환됩니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🌊</span>
+      <h3>플로우 스테이트 유지</h3>
+      <p>문서 검색, 스택 오버플로우 방황 없이 집중력을 깨지 않고 개발 흐름을 유지하세요.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🧠</span>
+      <h3>컨텍스트 인식 완성</h3>
+      <p>프로젝트 전체 맥락을 이해한 AI가 단순 자동완성을 넘어 아키텍처까지 제안합니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔮</span>
+      <h3>자연어 → 코드</h3>
+      <p>"로그인 폼 만들어줘" 한 마디로 완성된 컴포넌트가 생성됩니다. 생각이 곧 코드.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛡️</span>
+      <h3>스마트 버그 감지</h3>
+      <p>작성하는 순간 잠재적 버그를 탐지하고 수정 방법을 제안. 리뷰 비용을 90% 절감.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🚀</span>
+      <h3>원클릭 배포</h3>
+      <p>코드 완성에서 배포까지 파이프라인을 AI가 자동 구성. 인프라 걱정 없이 개발에만 집중.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">프로세스</div>
+  <h2 class="section-title fade-up">이렇게 작동합니다</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>아이디어 입력</h3>
+      <p>자연어로 무엇을 만들고 싶은지 자유롭게 설명하세요.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>AI 분석</h3>
+      <p>컨텍스트를 파악하고 최적의 구조와 기술 스택을 제안합니다.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>실시간 생성</h3>
+      <p>코드가 눈앞에서 완성됩니다. 수정은 대화로 즉시 반영됩니다.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>즉시 배포</h3>
+      <p>테스트, 최적화, 배포까지 원스톱으로 완료하세요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-num" data-target="10">0</div>
+      <div class="stat-label">배 빠른 개발 속도</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="50000">0</div>
+      <div class="stat-label">+ 활성 개발자</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="98">0</div>
+      <div class="stat-label">% 사용자 만족도</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="2">0</div>
+      <div class="stat-label">분 내 첫 코드 완성</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-label">사용자 후기</div>
+  <h2 class="section-title fade-up">개발자들이 말하다</h2>
+
+  <div class="testimonials-grid">
+    <div class="testimonial">
+      <p>바이브 코딩을 쓰고 나서 매일 쏟아내는 코드 양이 3배가 됐어요. 아이디어가 막힘없이 코드로 흐릅니다.</p>
+      <div class="t-author">
+        <div class="t-avatar av1">K</div>
+        <div class="t-info">
+          <div class="t-name">김민준</div>
+          <div class="t-role">풀스택 개발자 @ 스타트업</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <p>프로토타입을 하루 만에 완성했어요. 예전엔 일주일 걸렸는데. AI가 진짜 페어 프로그래머처럼 동작합니다.</p>
+      <div class="t-author">
+        <div class="t-avatar av2">L</div>
+        <div class="t-info">
+          <div class="t-name">Lee Sora</div>
+          <div class="t-role">프리랜서 개발자</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <p>비개발자인 저도 사용할 수 있어요. 원하는 기능을 말로 설명하면 코드가 완성됩니다. 마법 같아요.</p>
+      <div class="t-author">
+        <div class="t-avatar av3">P</div>
+        <div class="t-info">
+          <div class="t-name">박지원</div>
+          <div class="t-role">프로덕트 매니저</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-inner fade-up">
+    <h2>지금 바로<br><span>바이브를 느껴보세요</span></h2>
+    <p>무료로 시작하고, 코딩의 새로운 흐름을 경험하세요.<br>신용카드 불필요. 2분 안에 첫 코드 완성.</p>
+    <div class="cta-form">
+      <input type="email" class="cta-input" placeholder="이메일 주소를 입력하세요">
+      <button class="btn-primary" style="white-space:nowrap">무료 시작 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">vibe<span>.</span>coding</div>
+  <div class="footer-links">
+    <a href="#">문서</a>
+    <a href="#">블로그</a>
+    <a href="#">GitHub</a>
+    <a href="#">개인정보처리방침</a>
+  </div>
+  <div class="footer-copy">© 2025 Vibe Coding. All rights reserved.</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Particles
+const particleContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const colors = ['#63ffb3', '#3de0ff', '#ff6bde', '#ffe066'];
+  p.style.background = colors[Math.floor(Math.random() * colors.length)];
+  p.style.left = Math.random() * 100 + 'vw';
+  p.style.setProperty('--dur', (Math.random() * 15 + 10) + 's');
+  p.style.setProperty('--delay', -(Math.random() * 20) + 's');
+  p.style.setProperty('--dx', (Math.random() * 40 - 20) + 'px');
+  p.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+  particleContainer.appendChild(p);
+}
+
+// Terminal typing effect
+const lines = [
+  { type: 'cmd', prompt: '~', text: 'vibe init my-awesome-app' },
+  { type: 'out', text: '✓ 프로젝트 구조 생성 중...' },
+  { type: 'out', text: '✓ AI 컨텍스트 초기화...' },
+  { type: 'success', text: '✓ 준비 완료! 바이브를 느껴보세요' },
+  { type: 'cmd', prompt: '~/my-awesome-app', text: 'vibe "로그인 페이지 만들어줘"' },
+  { type: 'out', text: '' },
+  { type: 'code', text: '<span class="kw">const</span> <span class="fn">LoginPage</span> = () => {' },
+  { type: 'code', text: '  <span class="kw">const</span> [email, setEmail] = <span class="fn">useState</span>(<span class="str">""</span>)' },
+  { type: 'code', text: '  <span class="cm">// AI가 완성한 코드...</span>' },
+  { type: 'code', text: '}' },
+  { type: 'success', text: '✓ 컴포넌트 생성 완료!' },
+];
+
+let lineIdx = 0, charIdx = 0;
+const tb = document.getElementById('terminalBody');
+
+function renderLine(line, content) {
+  const div = document.createElement('div');
+  if (line.type === 'cmd') {
+    div.className = 't-line';
+    div.innerHTML = `<span class="t-prompt">${line.prompt} $</span><span class="t-cmd">${content}</span>`;
+  } else if (line.type === 'out') {
+    div.className = 't-out';
+    div.innerHTML = content;
+  } else if (line.type === 'success') {
+    div.className = 't-success';
+    div.innerHTML = content;
+  } else if (line.type === 'code') {
+    div.className = 't-out';
+    div.innerHTML = content;
+    div.style.paddingLeft = '2rem';
+    div.style.fontStyle = 'normal';
+  }
+  return div;
+}
+
+let currentEl = null;
+function typeNextChar() {
+  if (lineIdx >= lines.length) {
+    setTimeout(() => {
+      tb.innerHTML = '';
+      lineIdx = 0; charIdx = 0; currentEl = null;
+      typeNextChar();
+    }, 3000);
+    return;
+  }
+  const line = lines[lineIdx];
+  if (charIdx === 0) {
+    currentEl = renderLine(line, '');
+    tb.appendChild(currentEl);
+  }
+  const fullText = line.text || '';
+  charIdx++;
+  const rawText = fullText.replace(/<[^>]+>/g, '');
+  // For non-code lines, type char by char
+  if (line.type !== 'code') {
+    if (charIdx <= rawText.length) {
+      if (line.type === 'cmd') {
+        currentEl.querySelector('.t-cmd').textContent = rawText.slice(0, charIdx);
+      } else {
+        currentEl.innerHTML = rawText.slice(0, charIdx);
+        currentEl.className = line.type === 'success' ? 't-success' : (line.type === 'out' ? 't-out' : '');
+      }
+      setTimeout(typeNextChar, 40 + Math.random() * 30);
+    } else {
+      lineIdx++; charIdx = 0;
+      setTimeout(typeNextChar, line.type === 'cmd' ? 400 : 200);
+    }
+  } else {
+    // Code lines appear instantly
+    currentEl.innerHTML = fullText;
+    currentEl.style.paddingLeft = '2rem';
+    lineIdx++; charIdx = 0;
+    setTimeout(typeNextChar, 150);
+  }
+
+  // Scroll terminal
+  tb.scrollTop = tb.scrollHeight;
+}
+
+setTimeout(typeNextChar, 800);
+
+// Intersection Observer for animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // Counter animation for stats
+      if (e.target.classList.contains('stat-item')) {
+        const numEl = e.target.querySelector('.stat-num');
+        const target = parseInt(numEl.dataset.target);
+        animateCounter(numEl, target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.feature-card, .step, .stat-item, .testimonial, .fade-up').forEach(el => {
+  observer.observe(el);
+});
+
+function animateCounter(el, target) {
+  let current = 0;
+  const duration = 1500;
+  const startTime = performance.now();
+  function update(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    current = Math.round(eased * target);
+    if (target >= 1000) {
+      el.textContent = current.toLocaleString();
+    } else {
+      el.textContent = current;
+    }
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = target >= 1000 ? target.toLocaleString() : target;
+  }
+  requestAnimationFrame(update);
+}
+
+// Smooth nav highlight on scroll
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+  const scrollPos = window.scrollY + 100;
+  sections.forEach(sec => {
+    if (scrollPos >= sec.offsetTop && scrollPos < sec.offsetTop + sec.offsetHeight) {
+      document.querySelectorAll('nav a[href]').forEach(a => {
+        a.style.color = '';
+        if (a.getAttribute('href') === '#' + sec.id) {
+          a.style.color = 'var(--neon)';
+        }
+      });
+    }
+  });
+});
+
+// CTA button effect
+document.querySelector('.cta-form .btn-primary').addEventListener('click', function() {
+  const input = document.querySelector('.cta-input');
+  if (input.value.includes('@')) {
+    this.textContent = '✓ 등록 완료!';
+    this.style.background = 'var(--neon2)';
+    setTimeout(() => {
+      this.textContent = '무료 시작 →';
+      this.style.background = '';
+      input.value = '';
+    }, 2000);
+  } else {
+    input.style.borderColor = 'var(--neon3)';
+    setTimeout(() => input.style.borderColor = '', 1000);
+  }
+});
+</script>
+</body>
+</html>
